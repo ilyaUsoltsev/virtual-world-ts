@@ -1,13 +1,21 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>virtual-world</title>
+    <title>Vite + TS</title>
   </head>
   <body>
-    <div id="app"></div>
+    <h1>Virtual World</h1>
+    <canvas id="myCanvas"></canvas>
+    <div id="controls">
+      <button id="add-point">Add Point</button>
+      <button id="remove-point">Remove Point</button>
+      <button id="add-segment">Add Segment</button>
+      <button id="remove-segment">Remove Segment</button>
+      <button id="dispose-graph">Dispose Graph</button>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
