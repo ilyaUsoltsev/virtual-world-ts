@@ -1,7 +1,5 @@
 import { GraphEditor } from './graphEditor';
 import { Graph } from './math/graph';
-import { Point } from './primitives/point';
-import { Segment } from './primitives/segment';
 import './style.css';
 import { Viewport } from './viewport';
 
