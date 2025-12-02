@@ -2,6 +2,7 @@ import type { Graph } from './math/graph';
 import { getNearestPoint } from './math/utils';
 import { Point } from './primitives/point';
 import { Segment } from './primitives/segment';
+import type { Viewport } from './viewport';
 
 class GraphEditor {
   private canvas: HTMLCanvasElement;
@@ -11,9 +12,11 @@ class GraphEditor {
   private hoveredPoint: Point | null = null;
   private mouse: Point | null = null;
   private dragging = false;
+  private viewport: Viewport;
 
-  constructor(canvas: HTMLCanvasElement, graph: Graph) {
-    this.canvas = canvas;
+  constructor(viewport: Viewport, graph: Graph) {
+    this.viewport = viewport;
+    this.canvas = viewport.canvas;
     this.graph = graph;
     this.context = this.canvas.getContext('2d')!;
     this._addEventListeners();
@@ -36,21 +39,18 @@ class GraphEditor {
     }
   }
 
+  dispose() {
+    this.graph.dispose();
+    this.selected = null;
+    this.hoveredPoint = null;
+    this.mouse = null;
+    this.dragging = false;
+  }
+
   private _addEventListeners() {
     this.canvas.addEventListener('mousedown', this._handleMouseDown.bind(this));
-
-    this.canvas.addEventListener('mousemove', (event) => {
-      this.mouse = new Point(event.offsetX, event.offsetY);
-      // color hovered point differently
-      this.hoveredPoint = getNearestPoint(this.mouse, this.graph.points);
-
-      if (this.dragging && this.selected) {
-        this.selected.x = this.mouse.x;
-        this.selected.y = this.mouse.y;
-      }
-    });
-
-    // remove the menu
+    this.canvas.addEventListener('mousemove', this._handleMouseMove.bind(this));
+    // remove browser context menu
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     this.canvas.addEventListener('mouseup', () => (this.dragging = false));
   }
@@ -78,26 +78,43 @@ class GraphEditor {
       } else {
         this.selected = null;
       }
-
       return;
-    }
+    } else if (event.button === 0) {
+      if (this.hoveredPoint && !this.dragging && !this.selected) {
+        this.selected = this.hoveredPoint;
+        this.dragging = true;
+        return;
+      }
 
-    const mouse = new Point(event.offsetX, event.offsetY);
-    if (this.hoveredPoint && !this.dragging && !this.selected) {
-      this.selected = this.hoveredPoint;
-      this.dragging = true;
-      return;
-    }
+      if (this.hoveredPoint && this.selected) {
+        this._selectPoint(this.hoveredPoint);
+        return;
+      }
 
-    if (this.hoveredPoint && this.selected) {
-      this._selectPoint(this.hoveredPoint);
-      return;
+      if (!this.mouse) {
+        return;
+      }
+      // add new point
+      this.graph.addPoint(this.mouse);
+      this._selectPoint(this.mouse);
+      this.selected = this.mouse;
+      this.hoveredPoint = this.mouse;
     }
+  }
 
-    this.graph.addPoint(mouse);
-    this._selectPoint(mouse);
-    this.selected = mouse;
-    this.hoveredPoint = mouse;
+  private _handleMouseMove(event: MouseEvent) {
+    this.mouse = this.viewport.getMouse(event, true);
+    // color hovered point differently
+    this.hoveredPoint = getNearestPoint(
+      this.mouse,
+      this.graph.points,
+      10 / this.viewport.zoomLevel
+    );
+
+    if (this.dragging && this.selected) {
+      this.selected.x = this.mouse.x;
+      this.selected.y = this.mouse.y;
+    }
   }
 }
 

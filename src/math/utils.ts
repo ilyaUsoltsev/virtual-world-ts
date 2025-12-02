@@ -1,4 +1,4 @@
-import type { Point } from '../primitives/point';
+import { Point } from '../primitives/point';
 
 export const getNearestPoint = (
   target: Point,
@@ -17,4 +17,16 @@ export const getNearestPoint = (
   }
 
   return nearestPoint;
+};
+
+export const subtractPoints = (p1: Point, p2: Point): Point => {
+  return new Point(p1.x - p2.x, p1.y - p2.y);
+};
+
+export const addPoints = (p1: Point, p2: Point): Point => {
+  return new Point(p1.x + p2.x, p1.y + p2.y);
+};
+
+export const scalePoint = (p: Point, scale: number): Point => {
+  return new Point(p.x * scale, p.y * scale);
 };
